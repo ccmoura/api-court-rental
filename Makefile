@@ -8,9 +8,9 @@ drop_db:
 	docker exec -it court_rental_db dropdb court_rental
 
 migrate_up:
-	migrate -path src/db/migration -database "postgresql://root:secret@localhost:5432/court_rental_db?sslmode=disable" -verbose up
+	migrate -path api/database/migration -database "postgresql://root:secret@localhost:5432/court_rental_db?sslmode=disable" -verbose up
 
 migrate_down:
-	migrate -path src/db/migration -database "postgresql://root:secret@localhost:5432/court_rental_db?sslmode=disable" -verbose down
+	migrate -path api/database/migration -database "postgresql://root:secret@localhost:5432/court_rental_db?sslmode=disable" -verbose down
 
 .PHONY: database create_db drop_db migrate_up migrate_down

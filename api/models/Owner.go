@@ -13,8 +13,8 @@ type Owner struct {
 	Name string `json:"name"`
 	Email string `json:"email"`
 	Phone string `json:"phone"`
-  AreaCode string `json:"area_code"`
-  Password string `json:"password"`
+	AreaCode string `json:"area_code"`
+	Password string `json:"password"`
 	Cpf string `json:"cpf"`
 	IsConfirmed bool `json:"is_confirmed"`
 	CreatedAt time.Time `json:"created_at"`

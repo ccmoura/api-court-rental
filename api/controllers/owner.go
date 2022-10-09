@@ -48,3 +48,32 @@ func (server *Server) DeleteOwner(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusNoContent, id)
 }
+
+func (server *Server) UpdateOwner(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	uid := vars["id"]
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	owner := models.Owner{}
+	err = json.Unmarshal(body, &owner)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	owner.Prepare()
+
+	updateOwner, err := owner.UpdateOwner(server.DB, uid)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, updateOwner)
+}

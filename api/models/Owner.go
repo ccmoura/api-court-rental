@@ -63,3 +63,30 @@ func (owner *Owner) DeleteOwner(db *gorm.DB, id string) (int64, error) {
 	}
 	return db.RowsAffected, nil
 }
+
+func (owner *Owner) UpdateOwner(db *gorm.DB, uid string) (*Owner, error) {
+	err := owner.BeforeSave()
+	if err != nil {
+		return &Owner{}, err
+	}
+
+	db = db.Debug().Model(&Owner{}).Where("id = ?", uid).Take(&Owner{}).UpdateColumns(
+		map[string]interface{}{
+			"password":  owner.Password,
+			"name":  owner.Name,
+			"phone":     owner.Phone,
+			"area_code": owner.AreaCode,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Owner{}, db.Error
+	}
+
+	err = db.Debug().Model(&Owner{}).Where("id = ?", uid).Take(&owner).Error
+	if err != nil {
+		return &Owner{}, err
+	}
+
+	return owner, nil
+}

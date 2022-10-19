@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"projects/api-court-rental/api/controllers"
+	"api-court-rental/api/controllers"
 )
 
 var server = controllers.Server{}

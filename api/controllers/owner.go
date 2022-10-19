@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"projects/api-court-rental/api/models"
-	"projects/api-court-rental/api/responses"
+	"api-court-rental/api/models"
+	"api-court-rental/api/responses"
 )
 
 func (server *Server) CreateOwner(w http.ResponseWriter, r *http.Request) {

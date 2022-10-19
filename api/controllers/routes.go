@@ -1,7 +1,7 @@
 
 package controllers
 
-import "projects/api-court-rental/api/middlewares"
+import "api-court-rental/api/middlewares"
 
 func (s *Server) initializeRoutes() {
 	// owners routes

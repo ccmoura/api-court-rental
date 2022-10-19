@@ -1,0 +1,63 @@
+version: '3.9'
+services:
+  app:
+    container_name: api_court_rental
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_DRIVER=${DB_DRIVER}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+    tty: true
+    build: .
+    ports:
+      - 8080:8080
+    restart: on-failure
+    volumes:
+      - .:/app
+    depends_on:
+      - database
+    networks:
+      - court_rental_network
+
+  database:
+    image: postgres:latest
+    container_name: db_postgres
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - DATABASE_HOST=${DB_HOST}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    networks:
+      - court_rental_network
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d =${DB_PASSWORD}
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  migrate:
+    image: migrate/migrate
+    container_name: migrate
+    networks:
+      - court_rental_network
+    volumes:
+      - ./api/database/migration:/migration
+    command:  -path /migration -database postgres://${DB_USER}:${DB_PASSWORD}@database:${DB_PORT}/${DB_NAME}?sslmode=disable -verbose up
+    links:
+      - database
+    depends_on:
+      - database
+    restart: on-failure
+
+volumes:
+  pg_data:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  court_rental_network:
+    driver: bridge

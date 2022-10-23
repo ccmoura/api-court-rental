@@ -9,17 +9,17 @@ import (
 )
 
 type Owner struct {
-	ID string `json:"id"`
-	Name string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
-	AreaCode string `json:"area_code"`
-	Password string `json:"password"`
-	Cpf string `json:"cpf"`
-	IsConfirmed bool `json:"is_confirmed"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	DeletedAt sql.NullTime `json:"deleted_at"`
+	ID          string       `json:"id"`
+	Name        string       `json:"name"`
+	Email       string       `json:"email"`
+	Phone       string       `json:"phone"`
+	AreaCode    string       `json:"area_code"`
+	Password    string       `json:"password"`
+	Cpf         string       `json:"cpf"`
+	IsConfirmed bool         `json:"is_confirmed"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
+	DeletedAt   sql.NullTime `json:"deleted_at"`
 }
 
 func Hash(password string) ([]byte, error) {
@@ -72,10 +72,10 @@ func (owner *Owner) UpdateOwner(db *gorm.DB, uid string) (*Owner, error) {
 
 	db = db.Debug().Model(&Owner{}).Where("id = ?", uid).Take(&Owner{}).UpdateColumns(
 		map[string]interface{}{
-			"password":  owner.Password,
-			"name":  owner.Name,
-			"phone":     owner.Phone,
-			"area_code": owner.AreaCode,
+			"password":   owner.Password,
+			"name":       owner.Name,
+			"phone":      owner.Phone,
+			"area_code":  owner.AreaCode,
 			"updated_at": time.Now(),
 		},
 	)
@@ -89,4 +89,8 @@ func (owner *Owner) UpdateOwner(db *gorm.DB, uid string) (*Owner, error) {
 	}
 
 	return owner, nil
+}
+
+func VerifyPassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

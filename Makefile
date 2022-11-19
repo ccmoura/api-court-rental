@@ -13,4 +13,7 @@ migrate_up:
 migrate_down:
 	migrate -path api/database/migration -database "postgresql://root:secret@localhost:5432/court_rental_db?sslmode=disable" -verbose down
 
-.PHONY: database create_db drop_db migrate_up migrate_down
+rebuild_compose:
+	docker-compose up --build --remove-orphans --force-recreate
+
+.PHONY: database create_db drop_db migrate_up migrate_down rebuild_compose

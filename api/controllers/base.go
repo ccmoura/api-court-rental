@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
@@ -38,6 +39,7 @@ func (server *Server) Initialize(Dbdriver, DbUser, DbPassword, DbPort, DbHost, D
 }
 
 func (server *Server) Run(addr string) {
-	fmt.Println("🚀 Listening to port 8080")
+	fmt.Println("🚀 Listening to port " + os.Getenv("PORT"))
+
 	log.Fatal(http.ListenAndServe(addr, server.Router))
 }

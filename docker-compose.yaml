@@ -57,7 +57,6 @@ services:
 volumes:
   pg_data:
 
-# Networks to be created to facilitate communication between containers
 networks:
   court_rental_network:
     driver: bridge

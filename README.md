@@ -38,6 +38,7 @@ soon...
 #### /owners/:id
 * `PUT`: Update owner
 * `DELETE`: Delete owner
+* `GET`: Get owner
 
 #### /login
 * `POST`: User login

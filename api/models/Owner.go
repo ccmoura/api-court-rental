@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -15,7 +16,7 @@ type Owner struct {
 	Email       string       `json:"email"`
 	Phone       string       `json:"phone"`
 	AreaCode    string       `json:"area_code"`
-	Password    string       `json:"password"`
+	Password    string       `json:"password,omitempty"`
 	Cpf         string       `json:"cpf"`
 	IsConfirmed bool         `json:"is_confirmed"`
 	CreatedAt   time.Time    `json:"created_at"`
@@ -47,6 +48,7 @@ func (owner *Owner) BeforeSave() error {
 }
 
 func (owner *Owner) FindOwnerById(db *gorm.DB, id string) (*Owner, error) {
+	owner = &Owner{}
 	db = db.Debug().Model(&Owner{}).Where("id = ?", id).First(&owner)
 
 	if db.Error != nil {
@@ -139,4 +141,13 @@ func (owner *Owner) UpdateOwner(db *gorm.DB, uid string) (*Owner, error) {
 
 func VerifyPassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func (o Owner) MarshalJSON() ([]byte, error) {
+	type owner Owner
+	data := owner(o)
+
+	data.Password = ""
+
+	return json.Marshal(data)
 }

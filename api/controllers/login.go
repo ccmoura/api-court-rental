@@ -34,6 +34,7 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+
 	token, err := server.SignIn(owner.Email, owner.Password)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -50,10 +51,11 @@ func (server *Server) SignIn(email, password string) (string, error) {
 
 	owner := models.Owner{}
 
-	err = server.DB.Debug().Model(models.Owner{}).Where("email = ?", email).Take(&owner).Error
-	if err != nil {
+	db := server.DB.Debug().Model(models.Owner{}).Where("email = ?", email).Take(&owner)
+	if db.Error != nil {
 		return "", err
 	}
+
 	err = models.VerifyPassword(owner.Password, password)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err

@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"io"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,13 +15,32 @@ import (
 func (server *Server) CreateOwner(w http.ResponseWriter, r *http.Request) {
 	buffer, err := io.ReadAll(r.Body)
 	if err != nil {
-			panic(err)
+		panic(err)
 	}
 
 	owner := models.Owner{}
- 	err = json.Unmarshal(buffer, &owner)
+	err = json.Unmarshal(buffer, &owner)
+
+	err = owner.FindDuplicatedEmail(server.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusConflict, err)
+		return
+	}
+
+	err = owner.FindDuplicatedCpf(server.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusConflict, err)
+		return
+	}
+
+	err = owner.FindDuplicatedPhone(server.DB, "")
+	if err != nil {
+		responses.ERROR(w, http.StatusConflict, err)
+		return
+	}
 
 	owner.Prepare()
+
 	ownerCreated, err := owner.SaveOwner(server.DB)
 
 	if err != nil {
@@ -39,8 +58,13 @@ func (server *Server) DeleteOwner(w http.ResponseWriter, r *http.Request) {
 
 	id := vars["id"]
 
-	_, err := owner.DeleteOwner(server.DB, id)
+	_, err := owner.FindOwnerById(server.DB, id)
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, err)
+		return
+	}
 
+	_, err = owner.DeleteOwner(server.DB, id)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -52,7 +76,14 @@ func (server *Server) DeleteOwner(w http.ResponseWriter, r *http.Request) {
 func (server *Server) UpdateOwner(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	uid := vars["id"]
+	id := vars["id"]
+	owner := models.Owner{}
+
+	_, err := owner.FindOwnerById(server.DB, id)
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, err)
+		return
+	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -60,16 +91,21 @@ func (server *Server) UpdateOwner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	owner := models.Owner{}
 	err = json.Unmarshal(body, &owner)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
+	err = owner.FindDuplicatedPhone(server.DB, id)
+	if err != nil {
+		responses.ERROR(w, http.StatusConflict, err)
+		return
+	}
+
 	owner.Prepare()
 
-	updateOwner, err := owner.UpdateOwner(server.DB, uid)
+	updateOwner, err := owner.UpdateOwner(server.DB, id)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return

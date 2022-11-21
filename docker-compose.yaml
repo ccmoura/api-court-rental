@@ -3,6 +3,8 @@ services:
   app:
     container_name: api_court_rental
     environment:
+      - PORT=${PORT}
+      - API_SECRET=${API_SECRET}
       - DB_HOST=${DB_HOST}
       - DB_DRIVER=${DB_DRIVER}
       - DB_USER=${DB_USER}

@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -40,13 +41,58 @@ func (owner *Owner) BeforeSave() error {
 	if err != nil {
 		return err
 	}
+
 	owner.Password = string(hashedPassword)
 	return nil
 }
 
-func (owner *Owner) SaveOwner(db *gorm.DB) (*Owner, error) {
-	owner.BeforeSave()
+func (owner *Owner) FindOwnerById(db *gorm.DB, id string) (*Owner, error) {
+	db = db.Debug().Model(&Owner{}).Where("id = ?", id).First(&owner)
 
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	return owner, nil
+}
+
+func (owner *Owner) FindDuplicatedEmail(db *gorm.DB) error {
+	var result Owner
+	db = db.Debug().Model(&Owner{}).Where("email = ?", owner.Email).First(&result)
+
+	if db.Error != nil {
+		return nil
+	}
+
+	return errors.New("Email already exists")
+}
+
+func (owner *Owner) FindDuplicatedCpf(db *gorm.DB) error {
+	var result Owner
+	db = db.Debug().Model(&Owner{}).Where("cpf = ?", owner.Cpf).First(&result)
+
+	if db.Error != nil {
+		return nil
+	}
+
+	return errors.New("Cpf already exists")
+}
+
+func (owner *Owner) FindDuplicatedPhone(db *gorm.DB, except string) error {
+	var result Owner
+	if len(except) == 0 {
+		db = db.Debug().Model(&Owner{}).Where("phone = ?", owner.Phone).First(&result)
+	} else {
+		db = db.Debug().Model(&Owner{}).Where("phone = ? AND id != ?", owner.Phone, except).First(&result)
+	}
+
+	if db.Error != nil {
+		return nil
+	}
+
+	return errors.New("Phone already exists")
+}
+
+func (owner *Owner) SaveOwner(db *gorm.DB) (*Owner, error) {
 	var err error
 	err = db.Debug().Create(&owner).Error
 	if err != nil {

@@ -73,6 +73,30 @@ func (server *Server) DeleteOwner(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, id)
 }
 
+func (server *Server) getOwnerById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	var owner *models.Owner
+
+	id := vars["id"]
+
+	owner, err := owner.FindOwnerById(server.DB, id)
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, err)
+		return
+	}
+
+	ownerBuffer, err := owner.MarshalJSON()
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	json.Unmarshal(ownerBuffer, &owner)
+
+	responses.JSON(w, http.StatusOK, owner)
+}
+
 func (server *Server) UpdateOwner(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
